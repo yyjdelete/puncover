@@ -16,7 +16,9 @@ STACK_QUALIFIERS = "stack_qualifiers"
 ADDRESS = "address"
 TYPE = "type"
 TYPE_FUNCTION = "function"
-TYPE_VARIABLE = "variable"
+TYPE_VARIABLE_B = "variable_bss"
+TYPE_VARIABLE_D = "variable_data"
+TYPE_VARIABLE_R = "variable_const"
 TYPE_FILE = "file"
 TYPE_FOLDER = "folder"
 PREV_FUNCTION = "prev_function"
@@ -122,15 +124,16 @@ class Collector:
 
     # 00000550 00000034 T main	/Users/behrens/Documents/projects/pebble/puncover/puncover/build/../src/puncover.c:25
     if os.name == 'nt':
-        parse_size_line_re = re.compile(r"^([\da-f]{8})\s+([\da-f]{8})\s+(.)\s+(\w+)(\s+([a-zA-Z]:.+)):(\d+)?")
+        parse_size_line_re = re.compile(r"^([\da-f]{8})\s+([\da-f]{8})\s+(.)\s+([\w\.]+)(\s+([a-zA-Z]:.+):(\d+))?")
     else:
-        parse_size_line_re = re.compile(r"^([\da-f]{8})\s+([\da-f]{8})\s+(.)\s+(\w+)(\s+([^:]+):(\d+))?")
+        parse_size_line_re = re.compile(r"^([\da-f]{8})\s+([\da-f]{8})\s+(.)\s+([\w\.]+)(\s+([^:]+):(\d+))?")
 
 
-    def parse_size_line(self, line):
-        # print(line)
-        match = self.parse_size_line_re.match(line)
+    def parse_size_line(self, line0):
+        # print(line0)
+        match = self.parse_size_line_re.match(line0)
         if not match:
+            #print(line0)
             return False
 
         addr = match.group(1)
@@ -144,8 +147,9 @@ class Collector:
             file = None
             line = None
 
-        types = {"A": TYPE_FUNCTION, "T": TYPE_FUNCTION, "D": TYPE_VARIABLE, "B": TYPE_VARIABLE, "R": TYPE_VARIABLE}
-
+        types = {"A": TYPE_FUNCTION, "T": TYPE_FUNCTION, "W": TYPE_FUNCTION, "D": TYPE_VARIABLE_D, "B": TYPE_VARIABLE_B, "R": TYPE_VARIABLE_R}
+        #if types.get(type.upper(), None) is None:
+        #    print(line0)
         self.add_symbol(name, address=addr, size=size, file=file, line=line, type = types.get(type.upper(), None))
 
         return True
@@ -368,7 +372,7 @@ class Collector:
         return list([f for f in self.all_symbols() if f.get(TYPE, None) == TYPE_FUNCTION])
 
     def all_variables(self):
-        return list([f for f in self.all_symbols() if f.get(TYPE, None) == TYPE_VARIABLE])
+        return list([f for f in self.all_symbols() if f.get(TYPE, None) == TYPE_VARIABLE_B or f.get(TYPE, None) == TYPE_VARIABLE_D or f.get(TYPE, None) == TYPE_VARIABLE_R])
 
     def enhance_assembly(self):
         for key, symbol in self.symbols.items():
@@ -548,7 +552,7 @@ class Collector:
 
             f[SYMBOLS] = sorted(f[SYMBOLS], key=lambda s: s[NAME])
             f[FUNCTIONS] = list([s for s in f[SYMBOLS] if s.get(TYPE, None) == TYPE_FUNCTION])
-            f[VARIABLES] = list([s for s in f[SYMBOLS] if s.get(TYPE, None) == TYPE_VARIABLE])
+            f[VARIABLES] = list([s for s in f[SYMBOLS] if s.get(TYPE, None) == TYPE_VARIABLE_B or s.get(TYPE, None) == TYPE_VARIABLE_D or s.get(TYPE, None) == TYPE_VARIABLE_R])
 
         for f in self.all_folders():
             parent = f.get(FOLDER, None)

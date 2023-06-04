@@ -75,8 +75,16 @@ def symbol_code_size_filter(context, value):
     return traverse_filter_wrapper(value, lambda s: s.get(collector.SIZE, None) if s.get(collector.TYPE, None) == collector.TYPE_FUNCTION else 0)
 
 @jinja2.pass_context
-def symbol_var_size_filter(context, value):
-    return traverse_filter_wrapper(value, lambda s: s.get(collector.SIZE, None) if s.get(collector.TYPE, None) == collector.TYPE_VARIABLE else 0)
+def symbol_const_size_filter(context, value):
+    return traverse_filter_wrapper(value, lambda s: s.get(collector.SIZE, None) if s.get(collector.TYPE, None) == collector.TYPE_VARIABLE_R else 0)
+
+@jinja2.pass_context
+def symbol_data_size_filter(context, value):
+    return traverse_filter_wrapper(value, lambda s: s.get(collector.SIZE, None) if s.get(collector.TYPE, None) == collector.TYPE_VARIABLE_D else 0)
+
+@jinja2.pass_context
+def symbol_bss_size_filter(context, value):
+    return traverse_filter_wrapper(value, lambda s: s.get(collector.SIZE, None) if s.get(collector.TYPE, None) == collector.TYPE_VARIABLE_B else 0)
 
 @jinja2.pass_context
 def symbol_stack_size_filter(context, value, stack_base=None):
@@ -231,7 +239,9 @@ def sorted_filter(context, symbols):
         'name': lambda e: e.get(collector.DISPLAY_NAME, e.get(collector.NAME, None)).lower(),
         'code': lambda e: to_num(symbol_code_size_filter(context, e)),
         'stack': lambda e: to_num(symbol_stack_size_filter(context, e)),
-        'vars': lambda e: to_num(symbol_var_size_filter(context, e)),
+        'const': lambda e: to_num(symbol_const_size_filter(context, e)),
+        'data': lambda e: to_num(symbol_data_size_filter(context, e)),
+        'bss': lambda e: to_num(symbol_bss_size_filter(context, e)),
     }[sort_id]
 
     return list(sorted(symbols, key=key, reverse=(sort_order == 'desc')))
@@ -357,7 +367,9 @@ def register_jinja_filters(jinja_env):
     jinja_env.filters["symbol_url"] = symbol_url_filter
     jinja_env.filters["symbol_file_url"] = symbol_file_url_filter
     jinja_env.filters["symbol_code_size"] = symbol_code_size_filter
-    jinja_env.filters["symbol_var_size"] = symbol_var_size_filter
+    jinja_env.filters["symbol_const_size"] = symbol_const_size_filter
+    jinja_env.filters["symbol_data_size"] = symbol_data_size_filter
+    jinja_env.filters["symbol_bss_size"] = symbol_bss_size_filter
     jinja_env.filters["symbol_stack_size"] = symbol_stack_size_filter
     jinja_env.filters["if_not_none"] = if_not_none_filter
     jinja_env.filters["unique"] = unique_filter
