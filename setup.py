@@ -38,7 +38,7 @@ setup(
     name="puncover",
     version=__version__,
     description="Analyses C/C++ build output for code size, static variables, and stack usage.",
-    long_description=open("README.rst").read(),
+    long_description=open("README.md").read(),
     long_description_content_type="text/x-rst",
     url="https://github.com/hbehrens/puncover",
     download_url="https://github.com/hbehrens/puncover/tarball/%s" % __version__,
@@ -52,12 +52,12 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
     ],
     packages=find_packages(exclude=["tests", "tests.*"]),
     include_package_data=True,
@@ -68,7 +68,5 @@ setup(
     cmdclass={
         "clean": CleanCommand,
     },
-    # TODO: https://github.com/HBehrens/puncover/issues/36
-    #  Fix Python 3.5
-    python_requires=">=3.6",
+    python_requires=">=3.7",
 )
